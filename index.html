@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEON DEFENSE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap');
+
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: #000;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* ── CANVAS ── */
+#c {
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── BARRA CENTRAL ── */
+.center-bar {
+  height: 36px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-top: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.score { font-size: 13px; font-weight: 900; letter-spacing: 2px; }
+.score.s1 { color: #00cfff; text-shadow: 0 0 10px #00cfff; }
+.score.s2 { color: #ff6a00; text-shadow: 0 0 10px #ff6a00; }
+
+.timer-txt { font-size: 14px; color: #fff; letter-spacing: 3px; }
+
+/* ── UPGRADE MODAL ── */
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.90);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.modal.show { display: flex; }
+
+.modal-player { font-size: 11px; letter-spacing: 4px; }
+.modal-title  { font-size: 17px; font-weight: 900; letter-spacing: 2px; margin-bottom: 4px; }
+
+.upgrade-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 88vw;
+  max-width: 360px;
+}
+
+.upg-btn {
+  background: #0a0a0a;
+  border-radius: 8px;
+  padding: 14px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid #333;
+  transition: background 0.1s, transform 0.1s;
+  color: #fff;
+}
+.upg-btn:active { transform: scale(0.95); background: #111; }
+.upg-icon { font-size: 26px; }
+.upg-name { font-size: 10px; letter-spacing: 2px; text-align: center; }
+.upg-desc { font-size: 9px; color: #666; text-align: center; line-height: 1.4; }
+
+/* ── START SCREEN ── */
+.start-screen {
+  position: fixed; inset: 0;
+  background: #000;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.game-logo {
+  font-size: 28px; font-weight: 900;
+  letter-spacing: 6px; color: #fff;
+  text-shadow: 0 0 20px #fff;
+}
+.logo-sub { font-size: 10px; letter-spacing: 4px; color: #444; }
+
+.start-btn {
+  background: transparent;
+  border: 1.5px solid #fff;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 4px;
+  padding: 14px 36px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+.start-btn:hover { background: rgba(255,255,255,0.08); }
+
+.how {
+  font-size: 9px; color: #444;
+  letter-spacing: 1px; line-height: 2;
+  text-align: center; max-width: 280px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div class="center-bar">
+  <span class="score s1" id="s1">50%</span>
+  <span class="timer-txt" id="timer">2:00</span>
+  <span class="score s2" id="s2">50%</span>
+</div>
+
+<!-- UPGRADE / END MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-player" id="modal-player"></div>
+  <div class="modal-title"  id="modal-title"></div>
+  <div class="upgrade-grid" id="upg-grid"></div>
+</div>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="start">
+  <div class="game-logo">NEON DEFENSE</div>
+  <div class="logo-sub">PVP // SPLIT SCREEN</div>
+  <div class="how">
+    Las torres disparan solas<br>
+    Conquistá territorio enemigo<br>
+    Cada 15 seg elegís una mejora<br>
+    Ganás con más territorio al final
+  </div>
+  <button class="start-btn" id="startBtn">JUGAR</button>
+</div>
+
+<script type="module">
+  import { Game } from './src/core/Game.js';
+
+  const canvas = document.getElementById('c');
+  const game   = new Game(canvas);
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    document.getElementById('start').style.display = 'none';
+    game.start();
+  });
+</script>
+</body>
+</html>
