@@ -30,9 +30,8 @@ export class Tower {
    */
   tick(stats) {
     this.cooldown--;
-    const rate = Math.floor(TOWER.BASE_COOLDOWN / stats.rate);
     if (this.cooldown <= 0) {
-      this.cooldown = rate;
+      this.cooldown = TOWER.BASE_COOLDOWN; // cooldown fijo, sin modificar por stats.rate
       return true; // puede disparar
     }
     return false;
@@ -41,8 +40,9 @@ export class Tower {
   /**
    * Actualiza el movimiento rotatorio de la torre
    */
-  updateRotation() {
-    this.angle += this.rotationSpeed;
+  updateRotation(stats) {
+    const speedMultiplier = stats?.rotationSpeed || 1;
+    this.angle += this.rotationSpeed * speedMultiplier;
     // Mantener el ángulo en el rango [0, 2π]
     if (this.angle > Math.PI * 2) {
       this.angle -= Math.PI * 2;

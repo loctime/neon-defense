@@ -88,7 +88,8 @@ export class Game {
 
     // Update tower rotation
     for (const tower of this.towers) {
-      tower.updateRotation();
+      const stats = this.stats[tower.player - 1];
+      tower.updateRotation(stats);
     }
 
     // Towers shoot

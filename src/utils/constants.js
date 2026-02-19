@@ -24,7 +24,7 @@ export const GAME = {
 };
 
 export const TOWER = {
-  BASE_COOLDOWN: 45,    // frames entre disparos (a 30fps = 1.5s)
+  BASE_COOLDOWN: 5,     // frames entre disparos (a 30fps = 0.17s - casi continuo)
   BULLET_SPEED_BASE: 5,
 };
 
@@ -39,9 +39,9 @@ export const UPGRADES = [
   {
     id: 'rate',
     icon: '⚡',
-    name: 'VELOCIDAD +1',
-    desc: 'Torres disparan más rápido',
-    apply: (stats) => { stats.rate = Math.min(stats.rate + 0.5, 3); },
+    name: 'ROTACIÓN +1',
+    desc: 'Torres rotan más rápido',
+    apply: (stats) => { stats.rotationSpeed = (stats.rotationSpeed || 1) + 0.3; },
   },
   {
     id: 'range',
