@@ -116,8 +116,24 @@ export class Renderer {
     ctx.arc(x, y, r - 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Puntos de nivel
+    // Indicador de dirección (línea que apunta hacia donde dispara)
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    const dirX = x + Math.cos(tower.angle) * (r * 0.8);
+    const dirY = y + Math.sin(tower.angle) * (r * 0.8);
+    ctx.lineTo(dirX, dirY);
+    ctx.stroke();
+
+    // Punto en la punta del indicador
     ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(dirX, dirY, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Puntos de nivel
     ctx.shadowBlur = 6;
     for (let i = 0; i < tower.level; i++) {
       const angle = (i / tower.level) * Math.PI * 2 - Math.PI / 2;

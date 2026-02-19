@@ -86,6 +86,11 @@ export class Game {
   _tick() {
     if (!this.running) return;
 
+    // Update tower rotation
+    for (const tower of this.towers) {
+      tower.updateRotation();
+    }
+
     // Towers shoot
     for (const tower of this.towers) {
       const stats = this.stats[tower.player - 1];
@@ -123,7 +128,7 @@ export class Game {
 
   _shootFrom(tower, stats) {
     const range   = tower.getRange(stats);
-    const targets = this.grid.findClosestEnemies(tower.col, tower.row, tower.player, range, stats.bullets);
+    const targets = this._findTargetsInDirection(tower, range, stats.bullets);
     const color   = tower.player === 1 ? '#00cfff' : '#ff6a00';
 
     for (const tgt of targets) {
@@ -135,6 +140,41 @@ export class Game {
 
       this.bullets.push(new Bullet(tower.player, sx, sy, tx, ty, tgt.col, tgt.row, stats.dmg, speed));
     }
+  }
+
+  /**
+   * Encuentra objetivos en un cono frente a la torre según su ángulo actual
+   */
+  _findTargetsInDirection(tower, range, count = 1) {
+    const targets = [];
+    const coneAngle = Math.PI / 2; // 90 grados de cono de disparo (aumentado de 60)
+    
+    for (let r = 0; r < this.grid.rows; r++) {
+      for (let c = 0; c < this.grid.cols; c++) {
+        if (this.grid.cells[r][c].owner !== tower.player) {
+          // Calcular ángulo hacia la celda
+          const dx = c - tower.col;
+          const dy = r - tower.row;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance <= range) {
+            const targetAngle = Math.atan2(dy, dx);
+            let angleDiff = targetAngle - tower.angle;
+            
+            // Normalizar diferencia de ángulo
+            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+            
+            // Verificar si está dentro del cono
+            if (Math.abs(angleDiff) <= coneAngle / 2) {
+              targets.push({ col: c, row: r, dist: distance });
+            }
+          }
+        }
+      }
+    }
+    
+    return targets.sort((a, b) => a.dist - b.dist).slice(0, count);
   }
 
   // ----------------------------------------------------------

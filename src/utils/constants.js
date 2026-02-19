@@ -13,7 +13,7 @@ export const COLORS = {
 
 export const GRID = {
   CELL_SIZE: 14,      // px por celda
-  CELL_HP: 3,         // vida base de cada celda
+  CELL_HP: 1,         // vida base de cada celda (reducido de 3 a 1)
   SPREAD_CHANCE: 0.08, // probabilidad de dañar celda adyacente al conquistar
 };
 

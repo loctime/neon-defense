@@ -18,6 +18,10 @@ export class Tower {
     this.type = type;
     this.level = 1;
     this.cooldown = 0;
+    
+    // Movimiento rotatorio
+    this.angle = player === 1 ? 0 : Math.PI; // P1 apunta hacia abajo, P2 hacia arriba
+    this.rotationSpeed = 0.02; // radianes por frame (movimiento lento)
   }
 
   /**
@@ -32,6 +36,17 @@ export class Tower {
       return true; // puede disparar
     }
     return false;
+  }
+
+  /**
+   * Actualiza el movimiento rotatorio de la torre
+   */
+  updateRotation() {
+    this.angle += this.rotationSpeed;
+    // Mantener el ángulo en el rango [0, 2π]
+    if (this.angle > Math.PI * 2) {
+      this.angle -= Math.PI * 2;
+    }
   }
 
   /**
