@@ -15,8 +15,10 @@ import { sleep }         from '../utils/helpers.js';
 
 export class Game {
   constructor(canvas) {
+    console.log('Game constructor, canvas:', canvas);
     this.canvas   = canvas;
     this.renderer = new Renderer(canvas);
+    console.log('Renderer created:', this.renderer);
     this.hud      = new HUD();
     this.modal    = new UpgradeModal();
 
@@ -41,11 +43,14 @@ export class Game {
   // SETUP
   // ----------------------------------------------------------
   resize() {
+    console.log('Resizing canvas...');
     this.canvas.width  = this.canvas.offsetWidth;
     this.canvas.height = this.canvas.offsetHeight;
+    console.log('New canvas size:', this.canvas.width, 'x', this.canvas.height);
     if (this.grid) {
       this._CW = this.canvas.width  / this.grid.cols;
       this._CH = this.canvas.height / this.grid.rows;
+      console.log('Cell size:', this._CW, 'x', this._CH);
     }
   }
 
@@ -69,6 +74,11 @@ export class Game {
   // ----------------------------------------------------------
   start() {
     console.log('Game starting...');
+    
+    // Forzar resize inicial
+    this.canvas.width = this.canvas.offsetWidth || window.innerWidth;
+    this.canvas.height = (this.canvas.offsetHeight || window.innerHeight) - 36;
+    
     this.resize();
     this._initGrid();
     this.towers    = createInitialTowers(this.grid.cols, this.grid.rows);
@@ -79,6 +89,10 @@ export class Game {
     this.stats     = [INITIAL_STATS(), INITIAL_STATS()];
     this.gameTime  = GAME.DURATION;
     this.running   = true;
+
+    console.log('Grid dimensions:', this.grid.cols, 'x', this.grid.rows);
+    console.log('Cell size:', this._CW, 'x', this._CH);
+    console.log('Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
 
     this.tickInt = setInterval(() => this._tick(), 1000 / GAME.FPS);
     this._runTimerAndUpgrades();

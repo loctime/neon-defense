@@ -167,7 +167,14 @@ body {
   import { Game } from './src/core/Game.js';
 
   const canvas = document.getElementById('c');
-  const game   = new Game(canvas);
+  
+  // Forzar dimensiones del canvas
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight - 36; // Restar altura de la barra
+  
+  console.log('Canvas setup:', canvas.width, 'x', canvas.height);
+  
+  const game = new Game(canvas);
 
   document.getElementById('startBtn').addEventListener('click', () => {
     document.getElementById('start').style.display = 'none';

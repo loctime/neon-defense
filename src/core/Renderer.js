@@ -3,17 +3,23 @@
 // ============================================================
 
 import { COLORS, GRID } from '../utils/constants.js';
+import { LaserBeam } from '../entities/Bullet.js';
 
 export class Renderer {
   constructor(canvas) {
+    console.log('Renderer constructor, canvas:', canvas);
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    console.log('Canvas context:', this.ctx);
+    console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
   }
 
   get W() { return this.canvas.width; }
   get H() { return this.canvas.height; }
 
   clear() {
+    this.ctx.fillStyle = '#000000';
+    this.ctx.fillRect(0, 0, this.W, this.H);
     this.ctx.clearRect(0, 0, this.W, this.H);
   }
 
@@ -89,6 +95,7 @@ export class Renderer {
   // TORRES
   // ----------------------------------------------------------
   drawTowers(towers, CW, CH) {
+    console.log('Drawing towers:', towers.length, 'CW:', CW, 'CH:', CH);
     for (const t of towers) this.drawTower(t, CW, CH);
   }
 
