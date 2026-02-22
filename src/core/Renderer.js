@@ -156,21 +156,87 @@ export class Renderer {
     const { ctx } = this;
     for (const b of bullets) {
       ctx.save();
-      ctx.shadowColor = b.color;
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = b.color;
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Trail
-      ctx.shadowBlur = 0;
-      for (let i = 0; i < b.trail.length; i++) {
-        ctx.globalAlpha = (i / b.trail.length) * 0.3;
+      
+      if (b instanceof LaserBeam) {
+        // Dibujar laser como línea gruesa con glow
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = b.width;
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 15;
+        ctx.globalAlpha = 0.8;
+        
         ctx.beginPath();
-        ctx.arc(b.trail[i].x, b.trail[i].y, b.radius * 0.5, 0, Math.PI * 2);
+        ctx.moveTo(b.x, b.y);
+        ctx.lineTo(b.tx, b.ty);
+        ctx.stroke();
+        
+        // Efecto de pulsación
+        ctx.globalAlpha = 0.3;
+        ctx.lineWidth = b.width * 2;
+        ctx.stroke();
+      } else {
+        // Bala normal
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = b.color;
+        
+        if (b.isGhost) {
+          ctx.globalAlpha = 0.5;
+        }
+        
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Trail
+        ctx.shadowBlur = 0;
+        for (let i = 0; i < b.trail.length; i++) {
+          ctx.globalAlpha = (i / b.trail.length) * 0.3;
+          ctx.beginPath();
+          ctx.arc(b.trail[i].x, b.trail[i].y, b.radius * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      ctx.restore();
+    }
+  }
+
+  // ----------------------------------------------------------
+  // DRONES
+  // ----------------------------------------------------------
+  drawDrones(drones, CW, CH) {
+    const { ctx } = this;
+    for (const drone of drones) {
+      const pos = drone.getPosition(CW, CH);
+      
+      ctx.save();
+      
+      // Cuerpo del drone
+      ctx.fillStyle = drone.color;
+      ctx.shadowColor = drone.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, drone.radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Anillo orbital
+      ctx.strokeStyle = drone.color;
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, drone.radius + 3, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Indicador de cooldown
+      if (drone.shootCooldown > 0) {
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
         ctx.fill();
       }
+      
       ctx.restore();
     }
   }

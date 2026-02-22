@@ -31,10 +31,10 @@ export class Tower {
    * Actualiza el cooldown. Devuelve true cuando puede disparar.
    * @param {object} stats - stats del jugador (rate, etc.)
    */
-  tick(stats) {
+  tick(stats, modifiedCooldown = null) {
     this.cooldown--;
     if (this.cooldown <= 0) {
-      this.cooldown = TOWER.BASE_COOLDOWN; // cooldown fijo, sin modificar por stats.rate
+      this.cooldown = modifiedCooldown !== null ? modifiedCooldown : TOWER.BASE_COOLDOWN;
       return true; // puede disparar
     }
     return false;

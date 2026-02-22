@@ -28,58 +28,157 @@ export const TOWER = {
   BULLET_SPEED_BASE: 5,
 };
 
-export const UPGRADES = [
-  {
+export const POWERS = {
+  // Modificadores de Disparo (Stackables)
+  multiShot: {
+    id: 'multiShot',
+    icon: '🔫',
+    name: 'MULTI SHOT',
+    desc: '+1 bala adicional por disparo',
+    category: 'shooting',
+    maxLevel: 10,
+    apply: (stats) => { stats.multiShotLevel = (stats.multiShotLevel || 0) + 1; },
+  },
+  laser: {
+    id: 'laser',
+    icon: '⚡',
+    name: 'LASER',
+    desc: 'Balas se convierten en rayos penetrantes',
+    category: 'shooting',
+    maxLevel: 5,
+    apply: (stats) => { stats.laserLevel = (stats.laserLevel || 0) + 1; },
+  },
+  ricochet: {
+    id: 'ricochet',
+    icon: '�',
+    name: 'RICOCHET',
+    desc: 'Balas rebotan hacia enemigos cercanos',
+    category: 'shooting',
+    maxLevel: 5,
+    apply: (stats) => { stats.ricochetLevel = (stats.ricochetLevel || 0) + 1; },
+  },
+  shotgun: {
+    id: 'shotgun',
+    icon: '�',
+    name: 'SHOTGUN',
+    desc: 'Dispara múltiples proyectiles en abanico',
+    category: 'shooting',
+    maxLevel: 5,
+    apply: (stats) => { stats.shotgunLevel = (stats.shotgunLevel || 0) + 1; },
+  },
+  
+  // Habilidades Automáticas (Cooldown-based)
+  autoExplosion: {
+    id: 'autoExplosion',
+    icon: '💣',
+    name: 'EXPLOSIÓN AUTO',
+    desc: 'Bomba cada 5 segundos',
+    category: 'automatic',
+    maxLevel: 5,
+    apply: (stats) => { stats.autoExplosionLevel = (stats.autoExplosionLevel || 0) + 1; },
+  },
+  meteorite: {
+    id: 'meteorite',
+    icon: '☄️',
+    name: 'METEORITO',
+    desc: 'Impacto aleatorio en zona enemiga',
+    category: 'automatic',
+    maxLevel: 5,
+    apply: (stats) => { stats.meteoriteLevel = (stats.meteoriteLevel || 0) + 1; },
+  },
+  shockwave: {
+    id: 'shockwave',
+    icon: '🌊',
+    name: 'ONDA DE CHOQUE',
+    desc: 'Empuja frontera enemiga',
+    category: 'automatic',
+    maxLevel: 3,
+    apply: (stats) => { stats.shockwaveLevel = (stats.shockwaveLevel || 0) + 1; },
+  },
+  
+  // Mecánicas Avanzadas
+  overdrive: {
+    id: 'overdrive',
+    icon: '🚀',
+    name: 'OVERDRIVE',
+    desc: 'Doble velocidad de disparo por 3s',
+    category: 'advanced',
+    maxLevel: 3,
+    apply: (stats) => { stats.overdriveLevel = (stats.overdriveLevel || 0) + 1; },
+  },
+  drones: {
+    id: 'drones',
+    icon: '🛸',
+    name: 'DRONES',
+    desc: 'Genera drones orbitantes',
+    category: 'advanced',
+    maxLevel: 5,
+    apply: (stats) => { stats.droneLevel = (stats.droneLevel || 0) + 1; },
+  },
+  shadowTower: {
+    id: 'shadowTower',
+    icon: '�',
+    name: 'TORRE SOMBRA',
+    desc: '20% disparo duplicado fantasma',
+    category: 'advanced',
+    maxLevel: 5,
+    apply: (stats) => { stats.shadowTowerLevel = (stats.shadowTowerLevel || 0) + 1; },
+  },
+  
+  // Poderes clásicos (compatibilidad)
+  dmg: {
     id: 'dmg',
     icon: '⚔️',
     name: 'DAÑO +1',
     desc: 'Tus balas hacen más daño',
+    category: 'classic',
+    maxLevel: 10,
     apply: (stats) => { stats.dmg++; },
   },
-  {
+  rate: {
     id: 'rate',
     icon: '⚡',
     name: 'ROTACIÓN +1',
     desc: 'Torres rotan más rápido',
+    category: 'classic',
+    maxLevel: 10,
     apply: (stats) => { stats.rotationSpeed = (stats.rotationSpeed || 1) + 0.3; },
   },
-  {
-    id: 'range',
-    icon: '🔭',
-    name: 'RANGO +1',
-    desc: 'Mayor alcance de disparo',
-    apply: (stats) => { stats.range = Math.min(stats.range + 0.4, 3); },
-  },
-  {
-    id: 'multi',
-    icon: '💫',
-    name: 'MULTIBALA',
-    desc: 'Disparás 2 objetivos a la vez',
-    apply: (stats) => { stats.bullets = Math.min(stats.bullets + 1, 4); },
-  },
-  {
-    id: 'spread',
-    icon: '🌊',
-    name: 'EXPANSIÓN',
-    desc: 'Conquista se propaga más',
-    apply: (stats) => { stats.spreadBonus = (stats.spreadBonus || 0) + 1; },
-    // La lógica especial la maneja Grid.js usando stats.spreadBonus
-  },
-  {
-    id: 'nova',
-    icon: '💥',
-    name: 'SUPERNOVA',
-    desc: 'Explosión que conquista una zona',
-    apply: (stats) => { stats.pendingNova = true; },
-    // La lógica especial la maneja Game.js
-  },
-];
+};
+
+// Array plano para compatibilidad con modal
+export const POWERS_ARRAY = Object.values(POWERS);
 
 export const INITIAL_STATS = () => ({
+  // Stats clásicos
   dmg: 1,
   rate: 1,
   range: 1,
   bullets: 1,
   spreadBonus: 0,
   pendingNova: false,
+  
+  // Modificadores de Disparo
+  multiShotLevel: 0,
+  laserLevel: 0,
+  ricochetLevel: 0,
+  shotgunLevel: 0,
+  
+  // Habilidades Automáticas (cooldowns en frames)
+  autoExplosionLevel: 0,
+  autoExplosionCooldown: 0,
+  meteoriteLevel: 0,
+  meteoriteCooldown: 0,
+  shockwaveLevel: 0,
+  shockwaveCooldown: 0,
+  
+  // Mecánicas Avanzadas
+  overdriveLevel: 0,
+  overdriveDuration: 0,
+  overdriveCooldown: 0,
+  droneLevel: 0,
+  shadowTowerLevel: 0,
+  
+  // Control de niveles por poder
+  powerLevels: {},
 });

@@ -116,6 +116,75 @@ export class Grid {
   }
 
   /**
+   * Empuja frontera enemiga hacia atrás (poder Onda de Choque)
+   */
+  pushTerritory(player, distance) {
+    const conquered = [];
+    const enemyPlayer = player === 1 ? 2 : 1;
+    
+    // Encontrar frontera enemiga y empujar hacia atrás
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        if (this.cells[r][c].owner === enemyPlayer) {
+          // Verificar si está cerca de territorio aliado
+          let nearAlly = false;
+          for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+            const neighborCell = this.getCell(c + dc, r + dr);
+            if (neighborCell && neighborCell.owner === player) {
+              nearAlly = true;
+              break;
+            }
+          }
+          
+          if (nearAlly) {
+            // Calcular dirección de empuje (alejarse del jugador)
+            const playerCenter = this._getPlayerCenter(player);
+            const dx = c - playerCenter.col;
+            const dy = r - playerCenter.row;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist > 0) {
+              const pushCol = Math.round(c + (dx / dist) * distance);
+              const pushRow = Math.round(r + (dy / dist) * distance);
+              
+              // Mover celda enemiga si está en bounds
+              if (pushCol >= 0 && pushCol < this.cols && pushRow >= 0 && pushRow < this.rows) {
+                const targetCell = this.getCell(pushCol, pushRow);
+                if (targetCell && targetCell.owner === enemyPlayer) {
+                  this.conquerCell(c, r, player);
+                  conquered.push({ col: c, row: r });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    return conquered;
+  }
+  
+  /**
+   * Calcula el centro de territorio de un jugador
+   */
+  _getPlayerCenter(player) {
+    let sumCol = 0, sumRow = 0, count = 0;
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        if (this.cells[r][c].owner === player) {
+          sumCol += c;
+          sumRow += r;
+          count++;
+        }
+      }
+    }
+    return {
+      col: Math.round(sumCol / count),
+      row: Math.round(sumRow / count)
+    };
+  }
+
+  /**
    * Cuenta territorio por jugador
    */
   count() {

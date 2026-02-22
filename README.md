@@ -7,7 +7,7 @@ Dos jugadores en pantalla dividida (arriba/abajo). Las torres disparan solas; lo
 
 - **P1** controla la mitad superior (cyan)
 - **P2** controla la mitad inferior (naranja)
-- Las torres disparan automáticamente al territorio enemigo
+- Las torres rotan 360° y disparan automáticamente al territorio enemigo
 - Cada **15 segundos** el juego se pausa y cada jugador elige **1 mejora** de 4 opciones
 - Gana quien tenga **más territorio** al terminar los 2 minutos
 
@@ -24,7 +24,7 @@ neon-defense/
 │   ├── entities/
 │   │   ├── Tower.js        # Clase Torre
 │   │   ├── Bullet.js       # Clase Bala / proyectil
-│   │   └── Particle.js     # Sistema de partículas
+│   │   └── Drone.js        # Drones orbitantes
 │   ├── ui/
 │   │   ├── HUD.js          # Puntajes, timer, barra de territorio
 │   │   └── UpgradeModal.js # Modal de mejoras entre rondas
@@ -49,6 +49,46 @@ npx serve .
 # (puede haber restricciones de módulos ES6 en algunos browsers)
 ```
 
+## ⚡ Características implementadas
+
+### Mecánicas principales
+- **Sistema de conquista por grid**: Cada celda tiene 1 HP, se conquista al recibir daño
+- **Torres con rotación 360°**: Rotación continua y automática
+- **Disparo en cono**: Las torres disparan en un ángulo de 90° frente a ellas
+- **Sistema de partículas**: Efectos visuales al conquistar celdas
+- **Timer y pausas**: Partidas de 2 minutos con pausas cada 15 segundos
+
+### Tipos de proyectiles
+- **Balas normales**: Proyectiles básicos con trail visual
+- **Laser Beam**: Rayos penetrantes que dañan múltiples celdas en línea
+- **Shotgun**: Múltiples proyectiles en abanico
+- **Ricochet**: Balas que rebotan hacia enemigos cercanos
+
+### Habilidades automáticas
+- **Explosión Automática**: Bombas periódicas desde torres aleatorias
+- **Meteorito**: Impactos aleatorios en zona enemiga
+- **Onda de Choque**: Empuja la frontera enemiga hacia atrás
+- **Overdrive**: Duplica la velocidad de disparo temporalmente
+
+### Mecánicas avanzadas
+- **Drones orbitantes**: Unidades auxiliares que disparan automáticamente
+- **Torre Sombra**: 20% de probabilidad de disparo duplicado fantasma
+- **Multi Shot**: Balas adicionales por disparo
+- **Sistema de spread**: Daño en cadena al conquistar celdas
+
+### Poderes clásicos
+- **Daño +1**: Incrementa el daño de las balas
+- **Rotación +1**: Aumenta la velocidad de rotación de las torres
+- **Expansión**: Conquista instantánea de 20 celdas
+- **Supernova**: Explosión radial desde una torre
+
+### Interfaz y UX
+- **HUD en tiempo real**: Muestra puntajes, timer e indicadores de habilidades
+- **Modal de mejoras**: Sistema categorizado con 4 opciones balanceadas
+- **Indicadores visuales**: Cooldowns, estado de habilidades, niveles
+- **Pantalla de inicio**: Instrucciones y botón de inicio
+- **Pantalla de fin**: Resultados y opción de revancha
+
 ## 🛠️ Ideas para expandir
 
 ### Corto plazo
@@ -70,11 +110,19 @@ npx serve .
 
 ## ⚖️ Balance actual
 
-| Mejora      | Efecto              | Nivel máx |
-|-------------|---------------------|-----------|
-| Daño        | +1 hp de conquista  | ilimitado |
-| Velocidad   | ÷1.5 cooldown       | 3x        |
-| Rango       | +40% alcance        | 3x        |
-| Multibala   | +1 objetivo         | 4         |
-| Expansión   | conquista 20 celdas | —         |
-| Supernova   | blast radio 5       | —         |
+| Categoría | Poder | Efecto | Nivel máx |
+|-----------|-------|--------|-----------|
+| **Disparo** | Multi Shot | +1 bala adicional | 10 |
+| | Laser | Balas penetrantes | 5 |
+| | Ricochet | Rebotes automáticos | 5 |
+| | Shotgun | Disparo en abanico | 5 |
+| **Automático** | Explosión Auto | Bombas periódicas | 5 |
+| | Meteorito | Impactos aleatorios | 5 |
+| | Onda de Choque | Empuja frontera | 3 |
+| **Avanzado** | Overdrive | Doble velocidad temporal | 3 |
+| | Drones | Unidades orbitantes | 5 |
+| | Torre Sombra | 20% disparo fantasma | 5 |
+| **Clásico** | Daño +1 | +1 daño de bala | 10 |
+| | Rotación +1 | +30% velocidad rotación | 10 |
+| | Expansión | Conquista 20 celdas | — |
+| | Supernova | Explosión radial | — |

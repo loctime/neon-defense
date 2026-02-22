@@ -2,7 +2,7 @@
 // UpgradeModal.js — Modal de selección de mejoras
 // ============================================================
 
-import { UPGRADES } from '../utils/constants.js';
+import { POWERS_ARRAY } from '../utils/constants.js';
 import { pickRandom } from '../utils/helpers.js';
 
 export class UpgradeModal {
@@ -14,42 +14,108 @@ export class UpgradeModal {
   }
 
   /**
-   * Muestra el modal para un jugador y resuelve con la mejora elegida.
+   * Muestra el modal para un jugador y resuelve con el poder elegido.
    * @param {number} player - 1 o 2
-   * @returns {Promise<object>} - el upgrade elegido
+   * @returns {Promise<object>} - el poder elegido
    */
   show(player) {
     return new Promise(resolve => {
       const color = player === 1 ? '#00cfff' : '#ff6a00';
       this.elPlayer.textContent = `JUGADOR ${player}`;
       this.elPlayer.style.color = color;
-      this.elTitle.textContent  = 'ELEGÍ UNA MEJORA';
+      this.elTitle.textContent  = 'ELEGÍ UN PODER';
       this.elTitle.style.color  = color;
 
-      const options = pickRandom(UPGRADES, 4);
+      // Seleccionar poderes aleatorios con preferencia por categorías variadas
+      const options = this._selectBalancedPowers(POWERS_ARRAY, 4);
       this.elGrid.innerHTML = '';
 
-      for (const upg of options) {
+      for (const power of options) {
         const btn = document.createElement('button');
         btn.className = 'upg-btn';
         btn.style.borderColor = color + '55';
+        
+        // Añadir indicador de categoría
+        const categoryColor = this._getCategoryColor(power.category);
+        
         btn.innerHTML = `
-          <span class="upg-icon">${upg.icon}</span>
-          <span class="upg-name" style="color:${color}">${upg.name}</span>
-          <span class="upg-desc">${upg.desc}</span>
+          <div class="upg-header">
+            <span class="upg-icon">${power.icon}</span>
+            <span class="upg-category" style="color:${categoryColor};font-size:8px">${this._getCategoryName(power.category)}</span>
+          </div>
+          <span class="upg-name" style="color:${color}">${power.name}</span>
+          <span class="upg-desc">${power.desc}</span>
         `;
+        
         btn.addEventListener('click', () => {
           this.hide();
-          resolve(upg);
+          resolve(power);
         });
+        
         // Feedback táctil
         btn.addEventListener('touchstart', () => { btn.style.background = '#111'; }, { passive: true });
         btn.addEventListener('touchend',   () => { btn.style.background = ''; }, { passive: true });
+        
         this.elGrid.appendChild(btn);
       }
 
       this.el.classList.add('show');
     });
+  }
+  
+  /**
+   * Selecciona poderes balanceados para dar variedad
+   */
+  _selectBalancedPowers(powers, count) {
+    const categories = ['shooting', 'automatic', 'advanced', 'classic'];
+    const selected = [];
+    const available = [...powers];
+    
+    // Intentar obtener al menos uno de cada categoría principal
+    for (const category of categories) {
+      const categoryPowers = available.filter(p => p.category === category);
+      if (categoryPowers.length > 0 && selected.length < count) {
+        const power = categoryPowers[Math.floor(Math.random() * categoryPowers.length)];
+        selected.push(power);
+        available.splice(available.indexOf(power), 1);
+      }
+    }
+    
+    // Completar con poderes aleatorios si falta
+    while (selected.length < count && available.length > 0) {
+      const index = Math.floor(Math.random() * available.length);
+      selected.push(available[index]);
+      available.splice(index, 1);
+    }
+    
+    // Mezclar resultado
+    return selected.sort(() => Math.random() - 0.5);
+  }
+  
+  /**
+   * Obtiene color para categoría
+   */
+  _getCategoryColor(category) {
+    const colors = {
+      shooting: '#ff6b6b',
+      automatic: '#4ecdc4', 
+      advanced: '#45b7d1',
+      classic: '#96ceb4'
+    };
+    return colors[category] || '#ffffff';
+  }
+  
+  /**
+   * Obtiene nombre legible de categoría
+   */
+  _getCategoryName(category) {
+    const names = {
+      shooting: 'DISPARO',
+      automatic: 'AUTO',
+      advanced: 'AVANZADO', 
+      classic: 'CLÁSICO'
+    };
+    return names[category] || category;
   }
 
   /**
