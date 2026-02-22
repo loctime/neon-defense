@@ -8,7 +8,7 @@ export class Grid {
   constructor(cols, rows) {
     this.cols = cols;
     this.rows = rows;
-    this.cells = []; // cells[row][col] = { owner, hp, maxhp }
+    this.cells = []; // cells[row][col] = { owner, hp, maxhp, shield, fortified }
     this.init();
   }
 
@@ -19,7 +19,13 @@ export class Grid {
       this.cells[r] = [];
       for (let c = 0; c < this.cols; c++) {
         const owner = r < mid ? 1 : 2;
-        this.cells[r][c] = { owner, hp: GRID.CELL_HP, maxhp: GRID.CELL_HP };
+        this.cells[r][c] = { 
+          owner, 
+          hp: GRID.CELL_HP, 
+          maxhp: GRID.CELL_HP,
+          shield: 0,        // Temporary shield HP
+          fortified: false   // Permanent fortification status
+        };
       }
     }
   }
@@ -31,17 +37,45 @@ export class Grid {
 
   /**
    * Inflige daño a una celda. Si hp llega a 0, la conquista.
+   * UPDATED: Handles shields and fortification
    * @returns {boolean} true si la celda fue conquistada
    */
-  damageCell(col, row, player, dmg, spreadBonus = 0) {
+  damageCell(col, row, player, dmg, spreadBonus = 0, playerStats = null) {
     const cell = this.getCell(col, row);
     if (!cell || cell.owner === player) return false;
 
-    cell.hp -= dmg;
-    if (cell.hp <= 0) {
-      this.conquerCell(col, row, player);
-      this.spreadDamage(col, row, player, spreadBonus);
-      return true;
+    let actualDamage = dmg;
+    
+    // Apply defensive bonuses if player stats are provided
+    if (playerStats) {
+      const maxHP = GRID.CELL_HP + (playerStats.cellBonusHP || 0);
+      
+      // Apply shield first (temporary HP)
+      if (cell.shield > 0) {
+        const shieldDamage = Math.min(cell.shield, actualDamage);
+        cell.shield -= shieldDamage;
+        actualDamage -= shieldDamage;
+      }
+      
+      // Fortified cells take 50% reduced damage
+      if (cell.fortified) {
+        actualDamage = Math.floor(actualDamage * 0.5);
+      }
+      
+      // Update max HP for fortified cells
+      if (cell.fortified && cell.maxhp === GRID.CELL_HP) {
+        cell.maxhp = maxHP;
+        cell.hp = Math.min(cell.hp + (maxHP - GRID.CELL_HP), maxHP);
+      }
+    }
+
+    if (actualDamage > 0) {
+      cell.hp -= actualDamage;
+      if (cell.hp <= 0) {
+        this.conquerCell(col, row, player);
+        this.spreadDamage(col, row, player, spreadBonus);
+        return true;
+      }
     }
     return false;
   }
@@ -51,6 +85,88 @@ export class Grid {
     if (!cell) return;
     cell.owner = player;
     cell.hp = cell.maxhp;
+  }
+
+  /**
+   * Aplica escudos temporales a las celdas de un jugador
+   */
+  applyShields(player, shieldHP, duration) {
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = this.cells[r][c];
+        if (cell.owner === player) {
+          cell.shield = Math.max(cell.shield, shieldHP);
+          cell.shieldDuration = duration;
+        }
+      }
+    }
+  }
+
+  /**
+   * Fortifica las celdas de un jugador permanentemente
+   */
+  fortifyCells(player, bonusHP) {
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = this.cells[r][c];
+        if (cell.owner === player && !cell.fortified) {
+          cell.fortified = true;
+          cell.maxhp += bonusHP;
+          cell.hp += bonusHP;
+        }
+      }
+    }
+  }
+
+  /**
+   * Regenera celdas perdidas lentamente
+   */
+  regenerateCells(player, regenRate) {
+    const frontier = [];
+    
+    // Encontrar frontera para regeneración
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        if (this.cells[r][c].owner === player) {
+          // Buscar celdas vecinas enemigas
+          for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+            const neighborCell = this.getCell(c + dc, r + dr);
+            if (neighborCell && neighborCell.owner !== player && neighborCell.owner !== 0) {
+              frontier.push({ col: c + dc, row: r + dr });
+            }
+          }
+        }
+      }
+    }
+    
+    // Regenerar celdas en frontera
+    if (frontier.length > 0 && Math.random() < regenRate * 0.1) {
+      const target = frontier[Math.floor(Math.random() * frontier.length)];
+      const cell = this.getCell(target.col, target.row);
+      if (cell) {
+        cell.hp = Math.max(1, cell.hp - 1);
+        if (cell.hp <= 0) {
+          this.conquerCell(target.col, target.row, player);
+        }
+      }
+    }
+  }
+
+  /**
+   * Actualiza duración de escudos
+   */
+  updateShields() {
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = this.cells[r][c];
+        if (cell.shieldDuration > 0) {
+          cell.shieldDuration--;
+          if (cell.shieldDuration <= 0) {
+            cell.shield = 0;
+          }
+        }
+      }
+    }
   }
 
   /**
