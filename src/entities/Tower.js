@@ -19,9 +19,12 @@ export class Tower {
     this.level = 1;
     this.cooldown = 0;
     
-    // Movimiento rotatorio
-    this.angle = player === 1 ? 0 : Math.PI; // P1 apunta hacia abajo, P2 hacia arriba
-    this.rotationSpeed = 0.02; // radianes por frame (movimiento lento)
+    // Movimiento circular continuo 360°
+    this.rotationTime = 0;
+    this.rotationSpeed = 0.02; // radianes por frame
+    // Rotación completa de 0 a 2π
+    this.centerAngle = player === 1 ? 0 : Math.PI;
+    this.rotationAmplitude = Math.PI * 2; // 360° completo
   }
 
   /**
@@ -38,15 +41,16 @@ export class Tower {
   }
 
   /**
-   * Actualiza el movimiento rotatorio de la torre
+   * Actualiza el movimiento circular continuo 360° de la torre
    */
   updateRotation(stats) {
     const speedMultiplier = stats?.rotationSpeed || 1;
-    this.angle += this.rotationSpeed * speedMultiplier;
-    // Mantener el ángulo en el rango [0, 2π]
-    if (this.angle > Math.PI * 2) {
-      this.angle -= Math.PI * 2;
-    }
+    
+    // avanzar tiempo continuamente
+    this.rotationTime += this.rotationSpeed * speedMultiplier;
+    
+    // rotación lineal continua de 360° con módulo para transición suave
+    this.angle = (this.centerAngle + this.rotationTime) % (Math.PI * 2);
   }
 
   /**

@@ -148,7 +148,7 @@ export class Game {
    */
   _findTargetsInDirection(tower, range, count = 1) {
     const targets = [];
-    const coneAngle = Math.PI / 2; // 90 grados de cono de disparo (aumentado de 60)
+    const coneAngle = Math.PI / 2; // 90 grados de cono de disparo
     
     for (let r = 0; r < this.grid.rows; r++) {
       for (let c = 0; c < this.grid.cols; c++) {
@@ -159,15 +159,20 @@ export class Game {
           const distance = Math.sqrt(dx * dx + dy * dy);
           
           if (distance <= range) {
-            const targetAngle = Math.atan2(dy, dx);
-            let angleDiff = targetAngle - tower.angle;
+            let targetAngle = Math.atan2(dy, dx);
             
-            // Normalizar diferencia de ángulo
-            while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-            while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+            // Normalizar targetAngle al rango de tower.angle para comparación
+            while (targetAngle < tower.angle - Math.PI) {
+              targetAngle += Math.PI * 2;
+            }
+            while (targetAngle > tower.angle + Math.PI) {
+              targetAngle -= Math.PI * 2;
+            }
+            
+            const angleDiff = Math.abs(targetAngle - tower.angle);
             
             // Verificar si está dentro del cono
-            if (Math.abs(angleDiff) <= coneAngle / 2) {
+            if (angleDiff <= coneAngle / 2) {
               targets.push({ col: c, row: r, dist: distance });
             }
           }
